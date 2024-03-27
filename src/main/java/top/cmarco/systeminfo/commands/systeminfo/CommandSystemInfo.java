@@ -18,6 +18,14 @@
 
 package top.cmarco.systeminfo.commands.systeminfo;
 
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import top.cmarco.systeminfo.commands.SystemInfoCommand;
+import top.cmarco.systeminfo.enums.Messages;
+import top.cmarco.systeminfo.plugin.SystemInfo;
+import top.cmarco.systeminfo.utils.Utils;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -25,18 +33,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.stream.Stream;
 
-import org.bukkit.ChatColor;
-import org.jetbrains.annotations.NotNull;
-import top.cmarco.systeminfo.commands.SystemInfoCommand;
-import top.cmarco.systeminfo.plugin.SystemInfo;
-import top.cmarco.systeminfo.enums.Messages;
-import top.cmarco.systeminfo.utils.Utils;
-import static org.bukkit.World.Environment.NETHER;
-import static org.bukkit.World.Environment.NORMAL;
-import static org.bukkit.World.Environment.THE_END;
-
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
+import static org.bukkit.World.Environment.*;
 
 /**
  * The `CommandSystemInfo` class is a Spigot command that provides various system-related information and commands

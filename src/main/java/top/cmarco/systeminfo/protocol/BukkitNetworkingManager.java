@@ -18,28 +18,19 @@
 
 package top.cmarco.systeminfo.protocol;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.PacketTypeEnum;
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.ProtocolManager;
-import com.comphenix.protocol.events.ListenerPriority;
-import com.comphenix.protocol.events.PacketAdapter;
-import com.comphenix.protocol.events.PacketContainer;
-import com.comphenix.protocol.events.PacketEvent;
-import io.netty.buffer.ByteBuf;
+import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.event.EventManager;
+import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.jetbrains.annotations.NotNull;
 import top.cmarco.systeminfo.plugin.SystemInfo;
 
-import java.lang.reflect.Field;
-
 public final class BukkitNetworkingManager {
 
     private final SystemInfo plugin;
-    private final ProtocolManager protocolManager;
-
-    private long lastSentPackets = -1L, lastReceivedPackets = -1L, lastSentBytes = -1L, lastReceivedBytes = -1L;
-    private long totalSentPackets = -1L, totalReceivedPackets = -1L, totalSentBytes = -1L, totalReceivedBytes = -1L;
+    private final EventManager eventManager;
+    long lastSentPackets = -1L, lastReceivedPackets = -1L, lastSentBytes = -1L, lastReceivedBytes = -1L;
+    long totalSentPackets = -1L, totalReceivedPackets = -1L, totalSentBytes = -1L, totalReceivedBytes = -1L;
     private long lastReset = -1L;
 
     /**
@@ -49,7 +40,7 @@ public final class BukkitNetworkingManager {
      */
     public BukkitNetworkingManager(@NotNull final SystemInfo plugin) {
         this.plugin = plugin;
-        this.protocolManager = ProtocolLibrary.getProtocolManager();
+        this.eventManager = PacketEvents.getAPI().getEventManager();
     }
 
     /**
@@ -76,72 +67,11 @@ public final class BukkitNetworkingManager {
         totalReceivedPackets = 0L;
         this.startPacketCountResetScheduler();
 
-        loadPacketListeners(PacketType.Play.Server.class, true);
-        loadPacketListeners(PacketType.Play.Client.class, false);
-    }
-
-    /**
-     * Loads packet listeners for a specific packet type class.
-     *
-     * @param packetTypeClass The class representing the packet type.
-     * @param isServerPacket Indicates whether the packet is for the server.
-     */
-    private void loadPacketListeners(@NotNull final Class<? extends PacketTypeEnum> packetTypeClass, final boolean isServerPacket) {
-        final Field[] fields = packetTypeClass.getFields();
-
-        for (final Field packetField : fields) {
-            if (packetField.isAnnotationPresent(Deprecated.class)) {
-                continue;
-            }
-
-            try {
-                final PacketType packetType = (PacketType) packetField.get(null);
-
-                if (packetType == null) {
-                    plugin.getLogger().warning("Packet from " + packetField.getName() + " was null.");
-                    continue;
-                }
-
-                ListenerPriority priority = ListenerPriority.LOWEST;
-                if (!isServerPacket) {
-                    priority = ListenerPriority.NORMAL; // Adjust priority for client packets
-                }
-
-                protocolManager.addPacketListener(new PacketAdapter(plugin, priority, packetType) {
-                    @Override
-                    public void onPacketSending(@NotNull PacketEvent event) {
-                        processPacket(event.getPacket(), true);
-                    }
-
-                    @Override
-                    public void onPacketReceiving(@NotNull PacketEvent event) {
-                        processPacket(event.getPacket(), false);
-                    }
-
-                    private void processPacket(PacketContainer container, boolean isSending) {
-                        final Object byteBuf = container.serializeToBuffer();
-                        final ByteBuf byteBuf_ = (ByteBuf) byteBuf;
-                        final int bytes = byteBuf_.readableBytes();
-
-                        if (bytes > 0) {
-                            if (isSending) {
-                                totalSentBytes += bytes;
-                                lastSentBytes += bytes;
-                                ++lastSentPackets;
-                                ++totalSentPackets;
-                            } else {
-                                totalReceivedBytes += bytes;
-                                lastReceivedBytes += bytes;
-                                ++lastReceivedPackets;
-                                ++totalReceivedPackets;
-                            }
-                        }
-                    }
-                });
-
-            } catch (IllegalAccessException | ClassCastException exception) {
-                plugin.getLogger().warning(exception.getLocalizedMessage());
-            }
+        try {
+            this.eventManager.registerListener(new StatsPacketListener(this), PacketListenerPriority.LOWEST);
+        } catch (Exception illegalAccessException) {
+            plugin.getLogger().warning("Error registering listener!");
+            plugin.getLogger().warning(illegalAccessException.getLocalizedMessage());
         }
     }
 

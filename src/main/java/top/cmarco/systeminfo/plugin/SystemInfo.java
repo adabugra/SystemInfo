@@ -18,6 +18,8 @@
 
 package top.cmarco.systeminfo.plugin;
 
+import com.github.retrooper.packetevents.PacketEvents;
+import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
@@ -56,6 +58,18 @@ public final class SystemInfo extends JavaPlugin {
     private BukkitNetworkingManager networkingManager;
 
     /**
+     * Checks if the bukkit version contains OSHI.
+     *
+     * @param plugin The Plugin.
+     * @return True if at least Bukkit 1.17.
+     */
+    private static boolean checkVersion(@NotNull Plugin plugin) {
+        final String[] hasVersionOshi = {"1.17", "1.18", "1.19", "1.20", "1.21"};
+        final String currentVer = plugin.getServer().getBukkitVersion();
+        return Arrays.stream(hasVersionOshi).noneMatch(currentVer::contains);
+    }
+
+    /**
      * Called when the plugin is enabled. It initializes various components and registers listeners.
      */
     @Override
@@ -63,7 +77,7 @@ public final class SystemInfo extends JavaPlugin {
         INSTANCE = this;
         setupConfig();
         loadDependencies();
-        setupProtocolLib();
+        setupPacketEvents();
         loadValues();
         loadCommands();
         loadGui();
@@ -73,16 +87,41 @@ public final class SystemInfo extends JavaPlugin {
         setupMetrics();
     }
 
+    @Override
+    public void onLoad() {
+        final boolean hasPacketEvents = Bukkit.getPluginManager().getPlugin("packetevents") != null;
+        if (!hasPacketEvents) {
+            return;
+        }
+
+        PacketEvents.setAPI(SpigotPacketEventsBuilder.build(this));
+        PacketEvents.getAPI().getSettings()
+                .reEncodeByDefault(true)
+                .checkForUpdates(true)
+                .bStats(true);
+        PacketEvents.getAPI().load();
+    }
+
+    @Override
+    public void onDisable() {
+        final boolean hasPacketEvents = Bukkit.getPluginManager().getPlugin("packetevents") != null;
+        if (!hasPacketEvents) {
+            return;
+        }
+
+        PacketEvents.getAPI().terminate();
+    }
+
     /**
      * Set up behaviour when ProtocolLib is present.
      * The method will do nothing is the soft-dependency is absent.
      */
-    private void setupProtocolLib() {
-        final boolean hasProtocolLib = Bukkit.getPluginManager().getPlugin("ProtocolLib") != null;
+    private void setupPacketEvents() {
+        final boolean hasPacketEvents = Bukkit.getPluginManager().getPlugin("packetevents") != null;
 
-        if (!hasProtocolLib) {
-            getLogger().warning("Did not found [ProtocolLib] will not enable networking managing features.");
-            getLogger().info("Please, install the necessary version of ProtocolLib to enable more features!");
+        if (!hasPacketEvents) {
+            getLogger().warning("Did not found [packetevents] will not enable networking managing features.");
+            getLogger().info("Please, install the necessary version of packetevents to enable more features!");
             return;
         }
 
@@ -96,17 +135,6 @@ public final class SystemInfo extends JavaPlugin {
 
     private void setupConfig() {
         this.systemInfoConfig = new SystemInfoConfig(this);
-    }
-
-    /**
-     * Checks if the bukkit version contains OSHI.
-     * @param plugin The Plugin.
-     * @return True if at least Bukkit 1.17.
-     */
-    private static boolean checkVersion(@NotNull Plugin plugin) {
-        final String[] hasVersionOshi = {"1.17", "1.18", "1.19", "1.20", "1.21"};
-        final String currentVer = plugin.getServer().getBukkitVersion();
-        return Arrays.stream(hasVersionOshi).noneMatch(currentVer::contains);
     }
 
     /**

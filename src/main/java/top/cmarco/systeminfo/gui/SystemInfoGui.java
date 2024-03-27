@@ -208,10 +208,10 @@ public final class SystemInfoGui {
         } else {
 
             setCustomItem(GUI, Material.RECORD_3, 16, "&cNetworking",
-                    "&c! Missing ProtocolLib !",
+                    "&c! Missing PacketEvents-API !",
                     "&7In order to use this networking feature",
                     "&7you are required to install the correct",
-                    "&7version of ProtocolLib in your server.");
+                    "&7version of PacketEvents in your server.");
 
         }
 
