@@ -58,7 +58,13 @@ public final class CommandSensors extends SystemInfoCommand {
     public boolean execute(CommandSender sender, String s, String[] args) {
         if (sender.hasPermission("systeminfo.commands.sensors")) {
             if (args.length == 0) {
-                sender.sendMessage(Utils.color("&7Fans RPM: &a" + systemInfo.getSystemValues().getFansRPM()));
+
+                String fansRPM = systemInfo.getSystemValues().getFansRPM();
+                if (fansRPM == null || fansRPM.isEmpty()) {
+                    fansRPM = "&cUnavailable";
+                }
+
+                sender.sendMessage(Utils.color("&7Fans RPM: &a" + fansRPM));
                 sender.sendMessage(Utils.color("&7Cpu Voltage: &a" + systemInfo.getSystemValues().getCpuVoltage()));
                 sender.sendMessage(Utils.color("&7Cpu Temperature: " + systemInfo.getSystemValues().getCpuTemperatureStatus()));
                 return true;

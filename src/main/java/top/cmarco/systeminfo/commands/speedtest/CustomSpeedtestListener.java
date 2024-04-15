@@ -51,25 +51,24 @@ public final class CustomSpeedtestListener implements ISpeedTestListener {
         speedTestSocket.shutdownAndWait();
     }
 
-    private float lastPercent = -1f;
+    private long lastTime = -1L;
 
     @Override
     public void onProgress(float v, SpeedTestReport speedTestReport) {
-        long startTime = speedTestReport.getStartTime();
         float percent = speedTestReport.getProgressPercent();
 
-        if (Math.floor(percent - lastPercent) < 0.101f) {
+        if (System.currentTimeMillis() - lastTime <= plugin.getSystemInfoConfig().getSpeedtestUpdateFrequency()) {
             return;
         }
 
-        if (!((System.currentTimeMillis() - startTime) % plugin.getSystemInfoConfig().getSpeedtestUpdateFrequency() == 0)) {
-            return;
-        }
+        lastTime = System.currentTimeMillis();
 
         StringBuilder barBuilder = new StringBuilder("&7[");
+
         for (int i = 0; i < 100; i+=10) {
             barBuilder.append(i < percent ? "&a|" : "&c|");
         }
+
         barBuilder.append("&7]");
         sender.sendMessage(Utils.color("&7| &aDownload Progress: &e" + barBuilder + "  " + String.format("%.1f", percent) + "%"));
 

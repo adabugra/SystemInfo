@@ -19,7 +19,6 @@
 package top.cmarco.systeminfo.oshi;
 
 import org.bukkit.Bukkit;
-import org.bukkit.map.MinecraftFont;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 import oshi.hardware.*;
@@ -61,7 +60,9 @@ public final class SystemValues {
     private OperatingSystem.OSVersionInfo osVersionInfo;
     private NetworkIF serverNetworkInterface;
     private double lastCpuLoad = -1.00d;
+    private double[] lastCpuLoads;
     private long[] previousTicks;
+    private long[][] previousMultiTicks;
 
     private static int CPU_CORES_CACHE = -1; // caching to improve performance.
     private static int CPU_THREADS_CACHE = -1; // caching to improve performance.
@@ -439,6 +440,10 @@ public final class SystemValues {
         return lastCpuLoad;
     }
 
+    public double[] getLastCpuLoads() {
+        return lastCpuLoads;
+    }
+
     /**
      * Start a task that automatically updates the global CPU load.
      */
@@ -449,9 +454,12 @@ public final class SystemValues {
 
         SystemInfo.INSTANCE.getServer().getScheduler()
                 .runTaskTimerAsynchronously(SystemInfo.INSTANCE, () -> {
-                    if (previousTicks != null) {
+                    if (previousTicks != null && previousMultiTicks != null) {
                         lastCpuLoad = SystemInfo.INSTANCE.getSystemValues().getSystemCpuLoadBetweenTicks(previousTicks) * 100;
+                        lastCpuLoads = SystemInfo.INSTANCE.getSystemValues().getProcessorCpuLoadBetweenTicks(previousMultiTicks);
                     }
+
+                    previousMultiTicks = SystemInfo.INSTANCE.getSystemValues().getProcessorCpuLoadTicks();
                     previousTicks = SystemInfo.INSTANCE.getSystemValues().getSystemCpuLoadTicks();
                 }, 20L, 20L);
     }

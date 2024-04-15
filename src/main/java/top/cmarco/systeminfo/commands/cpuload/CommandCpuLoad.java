@@ -103,16 +103,40 @@ public final class CommandCpuLoad extends SystemInfoCommand {
     private CompletableFuture<String> getAverageLoads() {
         final CompletableFuture<String> future = new CompletableFuture<>();
         final BukkitScheduler scheduler = systemInfo.getServer().getScheduler();
-
+    
         scheduler.runTaskAsynchronously(systemInfo, () -> {
-            StringBuilder cpuLoads = new StringBuilder("&7Load per core:&a");
-            double[] load = systemInfo.getSystemValues().getProcessorCpuLoadBetweenTicks(previousMultiTicks);
-            for (final double average : load) {
-                cpuLoads.append(String.format(" %.1f%%", average * 100));
+            StringBuilder cpuLoads = new StringBuilder("&7Load per core: \n");
+    
+            double[] load = systemInfo.getSystemValues().getLastCpuLoads();
+            for (int i = 0; i < load.length; i++) {
+                
+                final double iLoad = load[i];
+                final StringBuilder tempBuilder = new StringBuilder(String.format("&f&lC&r%d&7[", i));
+
+                for (int j = 0; j < 10; j++) {
+                    if ((j+1)*0.1d <= iLoad) {
+                        tempBuilder.append("&c|");
+                    } else {
+                        tempBuilder.append("&a|");
+                    }
+
+                }
+
+                tempBuilder.append("&7] ").append(String.format("&7%.2f", 100*iLoad)).append('%');
+
+                cpuLoads.append(tempBuilder.toString());
+
+                cpuLoads.append("   ");
+
+                if ((i+1) % 4 == 0) {
+                    cpuLoads.append('\n');
+                }
+
             }
+    
             scheduler.runTask(systemInfo, () -> future.complete(cpuLoads.toString()));
         });
-
+    
         return future;
     }
 
