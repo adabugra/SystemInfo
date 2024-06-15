@@ -4,4 +4,4 @@
 
 ## SystemInfo
 The Master of Server Hardware. <br>
-Supports SpigotMC 1.7.10 to 1.20.5, Requires Java 8 or newer.
+Supports SpigotMC 1.7.10 to 1.21, Requires Java 8 or newer.

@@ -61,7 +61,7 @@ public class CommandGpu extends SystemInfoCommand {
             sender.sendMessage(Utils.color(" &a| &7GPU Vendor: &a" + gpu.getVendor()));
             sender.sendMessage(Utils.color(" &a| &7GPU Name: &a" + gpu.getName()));
             sender.sendMessage(Utils.color(" &a| &7GPU Version: &a" + gpu.getVersionInfo()));
-            sender.sendMessage(Utils.color(" &a| &7GPU VRAM: &a" + Utils.formatDataBits(gpu.getVRam())));
+            sender.sendMessage(Utils.color(" &a| &7GPU RAM: &a" + Utils.formatDataBits(gpu.getVRam())));
         }
     }
 

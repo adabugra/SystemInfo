@@ -6,7 +6,7 @@
 
     <groupId>top.cmarco</groupId>
     <artifactId>SystemInfo</artifactId>
-    <version>1.8.10-SNAPSHOT</version>
+    <version>1.8.11-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>SystemInfo</name>
