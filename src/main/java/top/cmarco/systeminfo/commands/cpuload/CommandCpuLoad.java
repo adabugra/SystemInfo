@@ -22,12 +22,12 @@ import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 
 import org.jetbrains.annotations.NotNull;
+import space.arim.morepaperlib.scheduling.GracefulScheduling;
 import top.cmarco.systeminfo.commands.SystemInfoCommand;
 import top.cmarco.systeminfo.plugin.SystemInfo;
 import top.cmarco.systeminfo.enums.Messages;
 import top.cmarco.systeminfo.utils.Utils;
 import org.bukkit.command.CommandSender;
-import org.bukkit.scheduler.BukkitScheduler;
 import oshi.util.Util;
 /**
  * The `CommandCpuLoad` class is a Spigot command that allows players with the appropriate permission to retrieve
@@ -82,13 +82,13 @@ public final class CommandCpuLoad extends SystemInfoCommand {
     @NotNull
     private CompletableFuture<Double> getCpuLoad() {
         final CompletableFuture<Double> future = new CompletableFuture<>();
-        final BukkitScheduler scheduler = systemInfo.getServer().getScheduler();
+        final GracefulScheduling scheduler = SystemInfo.morePaperLib.scheduling();
 
-        scheduler.runTaskAsynchronously(systemInfo, () -> {
+        scheduler.asyncScheduler().run(() -> {
             previousTicks = systemInfo.getSystemValues().getSystemCpuLoadTicks();
             previousMultiTicks = systemInfo.getSystemValues().getProcessorCpuLoadTicks();
             Util.sleep(1000);
-            scheduler.runTask(systemInfo, () -> future.complete(systemInfo.getSystemValues().getSystemCpuLoadBetweenTicks(previousTicks) * 100));
+            scheduler.globalRegionalScheduler().run(() -> future.complete(systemInfo.getSystemValues().getSystemCpuLoadBetweenTicks(previousTicks) * 100));
         });
 
         return future;
@@ -102,14 +102,14 @@ public final class CommandCpuLoad extends SystemInfoCommand {
     @NotNull
     private CompletableFuture<String> getAverageLoads() {
         final CompletableFuture<String> future = new CompletableFuture<>();
-        final BukkitScheduler scheduler = systemInfo.getServer().getScheduler();
-    
-        scheduler.runTaskAsynchronously(systemInfo, () -> {
+        final GracefulScheduling scheduler = SystemInfo.morePaperLib.scheduling();
+
+        scheduler.asyncScheduler().run(() -> {
             StringBuilder cpuLoads = new StringBuilder("&7Load per core: \n");
-    
+
             double[] load = systemInfo.getSystemValues().getLastCpuLoads();
             for (int i = 0; i < load.length; i++) {
-                
+
                 final double iLoad = load[i];
                 final StringBuilder tempBuilder = new StringBuilder(String.format("&f&lC&r%d&7[", i));
 
@@ -133,10 +133,10 @@ public final class CommandCpuLoad extends SystemInfoCommand {
                 }
 
             }
-    
-            scheduler.runTask(systemInfo, () -> future.complete(cpuLoads.toString()));
+
+            scheduler.globalRegionalScheduler().run(() -> future.complete(cpuLoads.toString()));
         });
-    
+
         return future;
     }
 

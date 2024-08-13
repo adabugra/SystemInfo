@@ -21,8 +21,8 @@ package top.cmarco.systeminfo.gui;
 import com.google.common.collect.ImmutableList;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemFlag;
-import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
+import space.arim.morepaperlib.scheduling.ScheduledTask;
 import top.cmarco.systeminfo.oshi.SystemValues;
 import top.cmarco.systeminfo.plugin.SystemInfo;
 import top.cmarco.systeminfo.protocol.BukkitNetworkingManager;
@@ -51,7 +51,7 @@ public final class SystemInfoGui {
     }
 
     private final SystemInfo systemInfo;
-    private final Map<UUID, BukkitTask> tasks = new HashMap<>();
+    private final Map<UUID, ScheduledTask> tasks = new HashMap<>();
 
     /* ---------------------------- */
     private static final List<Integer> BACKGROUND_SLOTS = ImmutableList.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 18, 27, 26, 25, 24, 23, 22, 21, 20, 19, 10);
@@ -60,7 +60,7 @@ public final class SystemInfoGui {
 
     /* ---------------------------- */
 
-    private BukkitTask fillTask = null;
+    private ScheduledTask fillTask = null;
 
     /* ---------------------------- */
 
@@ -70,12 +70,14 @@ public final class SystemInfoGui {
      * @param player a valid Player
      */
     public void createGui(@NotNull Player player) {
-        this.cleanBackground();
-        this.fillBackground();
-        player.openInventory(GUI);
+        SystemInfo.morePaperLib.scheduling().entitySpecificScheduler(player).run(() -> {
+            this.cleanBackground();
+            this.fillBackground();
+            player.openInventory(GUI);
+        }, null);
 
 
-        final BukkitTask bukkitTask = Bukkit.getScheduler().runTaskTimer(systemInfo, () -> {
+        final ScheduledTask scheduledTask = SystemInfo.morePaperLib.scheduling().entitySpecificScheduler(player).runAtFixedRate(() -> {
 
             final InventoryView inventoryView = player.getOpenInventory();
 
@@ -84,7 +86,7 @@ public final class SystemInfoGui {
                 this.updateInventory();
 
             } else {
-                BukkitTask bt = this.tasks.get(player.getUniqueId());
+                ScheduledTask bt = this.tasks.get(player.getUniqueId());
 
                 if (bt != null) {
                     bt.cancel();
@@ -92,9 +94,9 @@ public final class SystemInfoGui {
                 }
 
             }
-        }, 2L, 20L);
+        }, null, 2L, 20L);
 
-        this.tasks.put(player.getUniqueId(), bukkitTask);
+        this.tasks.put(player.getUniqueId(), scheduledTask);
     }
 
     /**
@@ -104,7 +106,7 @@ public final class SystemInfoGui {
     private void fillBackground() {
         final Iterator<Integer> invSlotIterator = SystemInfoGui.BACKGROUND_SLOTS.iterator();
 
-        this.fillTask = Bukkit.getScheduler().runTaskTimer(systemInfo, () -> {
+        this.fillTask = SystemInfo.morePaperLib.scheduling().globalRegionalScheduler().runAtFixedRate(() -> {
 
             if (invSlotIterator.hasNext()) {
 

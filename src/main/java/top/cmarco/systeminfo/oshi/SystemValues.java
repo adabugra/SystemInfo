@@ -27,6 +27,7 @@ import oshi.software.os.OperatingSystem;
 import top.cmarco.systeminfo.plugin.SystemInfo;
 import top.cmarco.systeminfo.utils.Utils;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -452,16 +453,15 @@ public final class SystemValues {
             return;
         }
 
-        SystemInfo.INSTANCE.getServer().getScheduler()
-                .runTaskTimerAsynchronously(SystemInfo.INSTANCE, () -> {
-                    if (previousTicks != null && previousMultiTicks != null) {
-                        lastCpuLoad = SystemInfo.INSTANCE.getSystemValues().getSystemCpuLoadBetweenTicks(previousTicks) * 100;
-                        lastCpuLoads = SystemInfo.INSTANCE.getSystemValues().getProcessorCpuLoadBetweenTicks(previousMultiTicks);
-                    }
+        SystemInfo.morePaperLib.scheduling().asyncScheduler().runAtFixedRate(() -> {
+            if (previousTicks != null && previousMultiTicks != null) {
+                lastCpuLoad = SystemInfo.INSTANCE.getSystemValues().getSystemCpuLoadBetweenTicks(previousTicks) * 100;
+                lastCpuLoads = SystemInfo.INSTANCE.getSystemValues().getProcessorCpuLoadBetweenTicks(previousMultiTicks);
+            }
 
-                    previousMultiTicks = SystemInfo.INSTANCE.getSystemValues().getProcessorCpuLoadTicks();
-                    previousTicks = SystemInfo.INSTANCE.getSystemValues().getSystemCpuLoadTicks();
-                }, 20L, 20L);
+            previousMultiTicks = SystemInfo.INSTANCE.getSystemValues().getProcessorCpuLoadTicks();
+            previousTicks = SystemInfo.INSTANCE.getSystemValues().getSystemCpuLoadTicks();
+        }, Duration.ofMillis(20L * 50L), Duration.ofMillis(20L * 50L));
     }
 
     /**

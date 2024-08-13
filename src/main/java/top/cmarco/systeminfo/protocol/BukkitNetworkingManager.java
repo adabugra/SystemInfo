@@ -21,9 +21,11 @@ package top.cmarco.systeminfo.protocol;
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.EventManager;
 import com.github.retrooper.packetevents.event.PacketListenerPriority;
-import org.bukkit.scheduler.BukkitScheduler;
 import org.jetbrains.annotations.NotNull;
+import space.arim.morepaperlib.scheduling.ScheduledTask;
 import top.cmarco.systeminfo.plugin.SystemInfo;
+
+import java.time.Duration;
 
 public final class BukkitNetworkingManager {
 
@@ -47,14 +49,14 @@ public final class BukkitNetworkingManager {
      * Starts the scheduler to reset packet count periodically.
      */
     private void startPacketCountResetScheduler() {
-        final BukkitScheduler scheduler = plugin.getServer().getScheduler();
-        scheduler.runTaskTimerAsynchronously(plugin, () -> {
+
+        final ScheduledTask scheduler = SystemInfo.morePaperLib.scheduling().asyncScheduler().runAtFixedRate(() -> {
             this.lastSentPackets = 0L;
             this.lastReceivedPackets = 0L;
             this.lastSentBytes = 0L;
             this.lastReceivedBytes = 0L;
             this.lastReset = System.currentTimeMillis();
-        }, 20L, 20L);
+        }, Duration.ofMillis(20 * 50), Duration.ofMillis(20 * 50));
     }
 
     /**

@@ -52,6 +52,11 @@
                                     <shadedPattern>top.cmarco.systeminfo.libs.org.bstats</shadedPattern>
                                 </relocation>
 
+                                <relocation>
+                                    <pattern>space.arim.morepaperlib</pattern>
+                                    <shadedPattern>top.cmarco.systeminfo.libs.space.arim.morepaperlib</shadedPattern>
+                                </relocation>
+
                             </relocations>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                         </configuration>
@@ -85,8 +90,13 @@
             <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
         </repository>
         <repository>
-            <id>codemc-releases</id>
-            <url>https://repo.codemc.io/repository/maven-releases/</url>
+            <id>codemc-snapshots</id>
+            <url>https://repo.codemc.io/repository/maven-snapshots/</url>
+        </repository>
+        <!-- MorePaperLib-->
+        <repository>
+            <id>arim-mvn-lgpl3</id>
+            <url>https://mvn-repo.arim.space/lesser-gpl3/</url>
         </repository>
 
     </repositories>
@@ -142,9 +152,9 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.retrooper.packetevents</groupId>
-            <artifactId>spigot</artifactId>
-            <version>2.2.1</version>
+            <groupId>com.github.retrooper</groupId>
+            <artifactId>packetevents-spigot</artifactId>
+            <version>2.4.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
 
@@ -156,6 +166,13 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- MorePaperLib -->
+        <dependency>
+            <groupId>space.arim.morepaperlib</groupId>
+            <artifactId>morepaperlib</artifactId>
+            <version>0.4.3</version>
+            <scope>compile</scope>
+        </dependency>
 
     </dependencies>
 </project>

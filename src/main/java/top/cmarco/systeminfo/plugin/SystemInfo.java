@@ -27,6 +27,7 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import space.arim.morepaperlib.MorePaperLib;
 import top.cmarco.systeminfo.api.SystemInfoPlaceholderExtension;
 import top.cmarco.systeminfo.commands.register.CommandManager;
 import top.cmarco.systeminfo.config.SystemInfoConfig;
@@ -47,6 +48,7 @@ import java.util.Arrays;
 public final class SystemInfo extends JavaPlugin {
 
     public static SystemInfo INSTANCE = null;
+    public static MorePaperLib morePaperLib = null;
     private final LocalDateTime startupTime = LocalDateTime.now(); // Timestamp when the plugin was loaded.
     private final PluginManager pluginManager = Bukkit.getPluginManager(); // The Spigot PluginManager instance.
     private CommandManager commandManager; // The custom CommandManager for handling plugin commands.
@@ -75,6 +77,7 @@ public final class SystemInfo extends JavaPlugin {
     @Override
     public void onEnable() {
         INSTANCE = this;
+        morePaperLib = new MorePaperLib(this);
         setupConfig();
         loadDependencies();
         setupPacketEvents();
